@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
+		<title>Download Wireguard Configurations</title>
+
+		<link href="https://mincss.com/entireframework.min.css" rel="stylesheet" type="text/css">
+	</head>
+	<body>
+		<nav class="nav" tabindex="-1" onclick="this.focus()">
+			<div class="container">
+				<a class="pagename current" href="https://securityriskadvisors.com/">Security Risk Advisors</a>
+			</div>
+		</nav>
+		<button class="btn-close btn btn-sm">×</button>
+		<div class="container">
+			<h1>Download Wireguard Configuration</h1>
+			<p>Paste the data URI from the wireguard_config script below and click "Download Configurations".</p>
+			<textarea style="width: 50%; height: 200px" id="config" placeholder="Paste data-uri here..."></textarea><br /><br />
+			<a class="btn btn-b btn-sm  smooth" id="submit">Download Configurations</a>
+
+		
+			<h3>Don't want to use this page?</h3>
+			<p>You can use a bookmarklet as well. You can right-click on <a href="javascript:(function()%7Bvar%20d%20%3D%20document%3B%0Avar%20od%20%3D%20d.createElement('div')%3B%0Aod.style.cssText%20%3D%20%22position%3A%20fixed%3B%20top%3A%200%3B%20display%3A%20block%3B%20width%3A%20100%25%3B%20height%3A%20100%25%3B%20background-color%3A%20rgba(0%2C0%2C0%2C0.5)%3B%20z-index%3A%20999%3B%22%0Avar%20dd%20%3D%20d.createElement('div')%3B%0Add.style.cssText%20%3D%20%22position%3A%20absolute%3B%20top%3A%2045%25%3B%20left%3A%2045%25%3B%22%3B%0Avar%20i%20%3D%20d.createElement('textarea')%3B%0Ai.placeholder%20%3D%20%22Paste%20data%20uri%20here...%22%3B%0Avar%20s%20%3D%20d.createElement('button')%3B%0As.innerHTML%20%3D%20%22Download%20File%2FClose%22%3B%0As.addEventListener(%22click%22%2C%20function()%20%7B%0Aif%20(i.value%20%3D%3D%20%22%22)%20%7B%0Ad.body.removeChild(od)%3B%0Areturn%3B%20%7D%0Al%20%3D%20d.createElement('a')%3B%0Al.download%20%3D%20%22configs.zip%22%3B%0Al.href%20%3D%20i.value%3B%0Al.click()%3B%0Add.appendChild(l)%3B%0Al.click()%3B%0Ad.body.removeChild(od)%3B%0A%7D)%3B%0Add.appendChild(i)%3B%0Add.appendChild(d.createElement('br')%3B%0Add.appendChild(s)%3B%0Aod.appendChild(dd)%3B%0Ad.body.appendChild(od)%3B%7D)()%3B">this link</a>
+				and select "Save to Favorites" or "Bookmark this Link."
+				<br />
+				Make sure you save it to your Favorites bar or Bookmark bar.
+				<br />
+				<br />
+			You can also drag the link below to your Bookmarks Bar.
+			<br />
+			<br />
+				<a class="btn smooth btn-a btn-sm" href="javascript:(function()%7Bvar%20d%20%3D%20document%3B%0Avar%20od%20%3D%20d.createElement('div')%3B%0Aod.style.cssText%20%3D%20%22position%3A%20fixed%3B%20top%3A%200%3B%20display%3A%20block%3B%20width%3A%20100%25%3B%20height%3A%20100%25%3B%20background-color%3A%20rgba(0%2C0%2C0%2C0.5)%3B%20z-index%3A%20999%3B%22%0Avar%20dd%20%3D%20d.createElement('div')%3B%0Add.style.cssText%20%3D%20%22position%3A%20absolute%3B%20top%3A%2045%25%3B%20left%3A%2045%25%3B%22%3B%0Avar%20i%20%3D%20d.createElement('textarea')%3B%0Ai.placeholder%20%3D%20%22Paste%20data%20uri%20here...%22%3B%0Avar%20s%20%3D%20d.createElement('button')%3B%0As.innerHTML%20%3D%20%22Download%20File%2FClose%22%3B%0As.addEventListener(%22click%22%2C%20function()%20%7B%0Aif%20(i.value%20%3D%3D%20%22%22)%20%7B%0Ad.body.removeChild(od)%3B%0Areturn%3B%20%7D%0Al%20%3D%20d.createElement('a')%3B%0Al.download%20%3D%20%22configs.zip%22%3B%0Al.href%20%3D%20i.value%3B%0Al.click()%3B%0Add.appendChild(l)%3B%0Al.click()%3B%0Ad.body.removeChild(od)%3B%0A%7D)%3B%0Add.appendChild(i)%3B%0Add.appendChild(d.createElement('br'))%3B%0Add.appendChild(s)%3B%0Aod.appendChild(dd)%3B%0Ad.body.appendChild(od)%3B%7D)()%3B">Download Configs</a>
+			</p>
+		</div>
+	<script>
+		function downloadFiles() {
+			let dataURI = document.getElementById('config').value;
+			if (dataURI != "" && dataURI.startsWith("data:application/zip;base64,")) {
+				let link = document.createElement('a');
+				link.download = "configs.zip";
+				link.href = dataURI;
+				document.body.appendChild(link);
+				link.click();
+			}
+		}
+		document.getElementById('config').addEventListener("keyup", function (e) {
+			if (e.keyCode === 13) {
+				downloadFiles();
+			}
+		});
+		document.getElementById('submit').addEventListener("mouseup", function(e) {
+			downloadFiles();
+		});
+	</script>
+		
+		
+	</body>
+</html>
