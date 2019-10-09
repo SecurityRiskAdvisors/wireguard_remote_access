@@ -23,7 +23,7 @@ if sys.version_info[0] < 3:
 # Set up statics for script
 MAX_CONFIG_SIZE = 1 * 2 ** 20
 
-DEFAULT_USERS_CONFIG = "/etc/wireguard/users.ini"
+DEFAULT_USERS_CONFIG = "/etc/wireguard/config.ini"
 
 server_config = ["[Interface]", "Address = {}", "ListenPort = {}", "PrivateKey = {}"]
 
