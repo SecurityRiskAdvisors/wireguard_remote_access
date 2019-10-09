@@ -49,14 +49,19 @@ client_config = [
 ]
 
 
-def err_print(*args, **kwargs):
-    print(*args, file=sys.stderr, **kwargs)
-
 
 regex_key = "^(?:[A-Za-z0-9+\/]{4})*(?:[A-Za-z0-9+\/]{2}==|[A-Za-z0-9+\/]{3}=)?$"
 
+def err_print(*args, **kwargs):
+    """err_print writes output to stderr instead of stdout"""
+    print(*args, file=sys.stderr, **kwargs)
+
 # Taken from here: https://stackoverflow.com/a/1094933
 def sizeof_fmt(num, suffix="B"):
+    """sizeof_fmt takes a value and returns the human-readable version of that value.
+
+    Taken from: https://stackoverflow.com/a/1094933
+    """
     for unit in ["", "Ki", "Mi", "Gi", "Ti", "Pi", "Ei", "Zi"]:
         if abs(num) < 1024.0:
             return "%3.1f%s%s" % (num, unit, suffix)
@@ -65,6 +70,14 @@ def sizeof_fmt(num, suffix="B"):
 
 
 def parse_parameters(config_file_contents):
+    """parse_parameters is a function that parses the config file parameters and validates them
+
+    Positional Arguments:
+    config_file_contents -- the contents of the config file
+
+    Returns:
+    config -- the parsed configparser object
+    """
     config = configparser.ConfigParser(interpolation=None, allow_no_value=False)
 
     try:
@@ -147,6 +160,17 @@ def parse_parameters(config_file_contents):
 
 
 def read_file(filepath, max_size=MAX_CONFIG_SIZE):
+    """read_file reads a filepath and returns the contents of a the file
+
+    Positional Arguments:
+    filepath -- the path of the file
+
+    Keyword Arguments:
+    max_size -- The max size the file is allowed to be. Defaults to: 1 * 2 ** 20
+
+    Returns:
+    file_contents -- the contents of the file at filepath
+    """
     file_size = os.path.getsize(filepath)
     if file_size < max_size:
         with open(filepath) as fp_filepath:
@@ -170,6 +194,7 @@ def read_file(filepath, max_size=MAX_CONFIG_SIZE):
 
 
 def read_and_parse_config(config_file=DEFAULT_USERS_CONFIG):
+    """read_and_parse_config will read the config file and attempt to parse it using configparser"""
 
     try:
         config_file_contents = read_file(config_file)
@@ -182,6 +207,7 @@ def read_and_parse_config(config_file=DEFAULT_USERS_CONFIG):
 
 
 def setup_state_file(state_file):
+    """setup_state_file attempts to read an existing state file and return the data or creates a new one if one doesn't exist"""
     size_state_file = 100 * MAX_CONFIG_SIZE
 
     retry = 0
@@ -214,6 +240,7 @@ def setup_state_file(state_file):
 
 
 def check_wg_config_path(wireguard_path):
+    """check_wg_config_path backups up the existing wg config and writes a new file for this script"""
     retry = 0
     while True:
         try:
@@ -253,6 +280,20 @@ def check_wg_config_path(wireguard_path):
 def create_user_wg_config(
     user, key, hosts, d_state, cidr_mask, config, server_pub_key, configs_zip, runid
 ):
+    """create_user_wg_config create the wg config for a specific user
+
+    Positional Arguments:
+    user -- username of the user
+    key -- key from the config file or auto
+    d_state -- state object
+    cidr_mask -- the network mask for this Interface
+    config -- configparser object
+    server_pub_key -- public key for the server
+    configs_zip -- out variable to update with config file contents
+    runid -- runid for this run of the script
+
+    There is no return for this function, it updates configs_zip with the config file
+    """
     if key == "auto":
         try:
             user_key = run_command("wg genkey")
@@ -319,6 +360,7 @@ def create_user_wg_config(
 
 
 def run_command(cmd):
+    """run_command runs a shell command and returns the output. It will not handle exceptions, letting the calling function do so"""
     return_value = (
         subprocess.check_output(cmd, shell=True, stderr=subprocess.STDOUT)
         .decode("utf-8")
@@ -328,6 +370,7 @@ def run_command(cmd):
 
 
 def check_wg_installed():
+    """check_wg_installed verifies if wireguard-tools is installed"""
     try:
         run_command("command wg")
     except:
@@ -337,12 +380,14 @@ def check_wg_installed():
 
 
 def verify_key(key):
+    """verify_key verifies if the key has a non-zero length and matches the base64 regex"""
     if len(key) == 0 or re.fullmatch(regex_key, key) == None:
         raise ValueError
     else:
         return
 
 def write_file(path, data):
+    """write_file attempts to write a file to disk and returns bytes written"""
     index = 0
     while True:
         try:
@@ -363,6 +408,18 @@ def write_file(path, data):
 
 
 def wireguard_config(config, reset):
+    """wireguard_config is the main function that manages generating the configs
+
+    Positional Arguments:
+    config -- the verified configparser object
+    reset -- Whether to clear the state and regenerate all configs
+
+    Returns:
+    None
+
+    Outputs the _new_ wireguard config files on stdout
+    Outputs all information and errors on stderr
+    """
 
     runid = random.randint(0, 100000)
 
@@ -528,6 +585,12 @@ def wireguard_config(config, reset):
 
 
 def restart_service(config, restart):
+    """restart_service will attempt to restart the wg-quick service for a detected interface
+
+    Positional Arguments:
+    config -- the configparser object
+    restart -- the restart command line parameter
+    """
     # We don't want to restart so let's not even try
     if restart == "no" or restart == "n":
         return
