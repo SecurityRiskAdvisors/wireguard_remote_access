@@ -69,15 +69,15 @@ def parse_parameters(config_file_contents):
 
     try:
         config.read_string(config_file_contents)
-    except configparser.Error:
+    except configparser.Error as e:
         raise ValueError(
-            "Malformed config file -- could not parse config file"
+                "Malformed config file -- could not parse config file. Error: {}".format(e)
         ) from None
 
     try:
         ipaddress.ip_network(config["General"].get("Network"))
-    except ValueError:
-        raise ValueError("Network needs to be a valid network") from None
+    except ValueError as e:
+        raise ValueError("Network needs to be a valid network. Error: {}".format(e)) from None
 
     if (
         config["General"].get("WiregardConfig") == None
@@ -124,7 +124,7 @@ def parse_parameters(config_file_contents):
 
     try:
         config["Server"].getint("ListenPort")
-    except ValueError:
+    except ValueError as e:
         raise ValueError("ListenPort needs to be an integer") from None
 
     try:
@@ -132,7 +132,7 @@ def parse_parameters(config_file_contents):
             raise ValueError("Server PrivateKey cannot be empty.")
     except ValueError:
         raise
-    except KeyError:
+    except KeyError as e:
         raise ValueError("Server PrivateKey cannot be empty.") from None
 
     if config["PeerConfig"].get("PublicIP") == "93.184.216.34":
@@ -234,7 +234,7 @@ def check_wireguard_conf(wireguard_path):
             return
         except OSError as e:
             if retry > 2:
-                raise
+                raise e
 
             err_print(
                 "Could not create {} due to {}. Retrying...".format(
@@ -266,7 +266,7 @@ def create_config(
         user_key = key
         try:
             verify_key(user_key)
-        except ValueError:
+        except ValueError as e:
             raise ValueError(
                 "Key for {user} does not appear to be valid. Key: {key}".format(
                     user=user, key=key
