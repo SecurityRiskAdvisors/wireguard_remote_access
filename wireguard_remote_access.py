@@ -425,7 +425,6 @@ def wireguard_config(config, reset):
 
     check_wg_installed()
 
-    check_wg_config_path(config["General"].get("WiregardConfig"))
 
     # Set up local state
     d_state = setup_state_file(config["General"].get("State"))
@@ -542,9 +541,12 @@ def wireguard_config(config, reset):
 
         pass
 
+    write_file(config["General"].get("State"), json.dumps(d_state))
+
+    check_wg_config_path(config["General"].get("WiregardConfig"))
+
     write_file(config["General"].get("WiregardConfig"), "{}\n".format(wg_config))
 
-    write_file(config["General"].get("State"), json.dumps(d_state))
 
     if len(configs_zip) > 0:
         configsZip = io.BytesIO()
