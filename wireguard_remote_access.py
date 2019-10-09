@@ -169,7 +169,7 @@ def read_file(filepath, max_size=MAX_CONFIG_SIZE):
     pass
 
 
-def parse_config(config_file=DEFAULT_USERS_CONFIG):
+def read_and_parse_config(config_file=DEFAULT_USERS_CONFIG):
 
     try:
         config_file_contents = read_file(config_file)
@@ -181,7 +181,7 @@ def parse_config(config_file=DEFAULT_USERS_CONFIG):
     return parse_parameters(config_file_contents)
 
 
-def setup_state(state_file):
+def setup_state_file(state_file):
     size_state_file = 100 * MAX_CONFIG_SIZE
 
     retry = 0
@@ -213,7 +213,7 @@ def setup_state(state_file):
     pass  # enddef
 
 
-def check_wireguard_conf(wireguard_path):
+def check_wg_config_path(wireguard_path):
     retry = 0
     while True:
         try:
@@ -250,7 +250,7 @@ def check_wireguard_conf(wireguard_path):
     pass  # enddef
 
 
-def create_config(
+def create_user_wg_config(
     user, key, hosts, d_state, cidr_mask, config, server_pub_key, configs_zip, runid
 ):
     if key == "auto":
@@ -342,6 +342,25 @@ def verify_key(key):
     else:
         return
 
+def write_file(path, data):
+    index = 0
+    while True:
+        try:
+            with open(path, mode="wt") as f:
+                return f.write(data)
+        except OSError as e:
+            if index > 2:
+                raise e from None
+
+            err_print("Could not write {path} due to {error}.".format(path=path, error=str(e)))
+            index += 1
+            time.sleep(1 * index)
+        except:
+            raise
+
+        pass
+    pass
+
 
 def wireguard_config(config, reset):
 
@@ -349,10 +368,10 @@ def wireguard_config(config, reset):
 
     check_wg_installed()
 
-    check_wireguard_conf(config["General"].get("WiregardConfig"))
+    check_wg_config_path(config["General"].get("WiregardConfig"))
 
     # Set up local state
-    d_state = setup_state(config["General"].get("State"))
+    d_state = setup_state_file(config["General"].get("State"))
 
     # If the network in the config file changed, clear state. We are gonna redo everything
     if (
@@ -416,7 +435,7 @@ def wireguard_config(config, reset):
                 )
             )
         if user not in d_state["users"]:
-            (client_pub_key, addr) = create_config(
+            (client_pub_key, addr) = create_user_wg_config(
                 user,
                 key,
                 hosts,
@@ -447,7 +466,7 @@ def wireguard_config(config, reset):
                 )
                 # In case we don't have something, abandon this cache and build from the config
                 d_state["users"][user] = {}
-                (client_pub_key, addr) = create_config(
+                (client_pub_key, addr) = create_user_wg_config(
                     user,
                     key,
                     hosts,
@@ -456,6 +475,7 @@ def wireguard_config(config, reset):
                     config,
                     server_pub_key,
                     configs_zip,
+                    runid
                 )
 
         wg_config += "\n"
@@ -465,14 +485,9 @@ def wireguard_config(config, reset):
 
         pass
 
-    with open(config["General"].get("WiregardConfig"), mode="wt") as f:
-        f.write("{}\n".format(wg_config))
+    write_file(config["General"].get("WiregardConfig"), "{}\n".format(wg_config))
 
-    json_state = json.dumps(d_state)
-
-    with open(config["General"].get("State"), mode="wt") as f:
-        l = f.write(json_state)
-        # Maybe check the length, how important is it?
+    write_file(config["General"].get("State"), json.dumps(d_state))
 
     if len(configs_zip) > 0:
         configsZip = io.BytesIO()
@@ -575,7 +590,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    config = parse_config(config_file=args.config)
+    config = read_and_parse_config(config_file=args.config)
 
     # TODO implement logging which can be updated from main
     wireguard_config(config, args.reset)
